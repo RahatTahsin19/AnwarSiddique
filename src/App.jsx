@@ -73,7 +73,7 @@ const App = () => {
 
   // News data (sample images + content)
   const newsData = [
-    { id: 1, category: 'জনসভা', date: '২৪ জানুয়ারি, ২০২৬', title: 'বিশাল জনসভায় প্রার্থীর উন্নয়ন অঙ্গীকারে উজ্জ্বল প্রতিশ্রুতি', img: 'https://images.unsplash.com/photo-1520975681913-8f2b3a90a8a9?auto=format&fit=crop&q=80&w=1200' },
+    { id: 1, category: 'জনসভা', date: '২৪ জানুয়ারি, ২০২৬', title: 'বিশাল জনসভায় প্রার্থীর উন্নvelopment অঙ্গীকারে উজ্জ্বল প্রতিশ্রুতি', img: 'https://images.unsplash.com/photo-1520975681913-8f2b3a90a8a9?auto=format&fit=crop&q=80&w=1200' },
     { id: 2, category: 'প্রচারণা', date: '২২ জানুয়ারি, ২০২৬', title: 'বাড়ি বাড়ি গিয়ে ভোটারদের সাথে হৃদ্য আলাপ', img: 'https://images.unsplash.com/photo-1509099836639-18ba8a6aa4a3?auto=format&fit=crop&q=80&w=1200' },
     { id: 3, category: 'উন্নয়ন', date: '২০ জানুয়ারি, ২০২৬', title: 'নতুন পাঠাগার উদ্বোধন: শিশুদের জন্য মুক্ত পাঠ্যসামগ্রী', img: 'https://images.unsplash.com/photo-1526318472351-c75fcf070b8f?auto=format&fit=crop&q=80&w=1200' }
   ];
@@ -121,7 +121,6 @@ const App = () => {
     };
     rafId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(rafId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // run once on mount
 
   // Featured news auto-advance
@@ -137,7 +136,6 @@ const App = () => {
     if (aiResponse && (!message || message.length < 20)) {
       setMessage(prev => prev && prev.length > 10 ? prev : aiResponse);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aiResponse]);
 
   // Gemini API Integration - AI Manifesto Assistant (with retries)
@@ -147,12 +145,7 @@ const App = () => {
     setAiResponse('');
     setUserQuery(query);
 
-    const systemPrompt = `You are an AI political assistant for a candidate running in Bangladesh in 2026. The manifesto focuses on:
-1) Education & Tech (smart classrooms, WiFi)
-2) Health (modern hospitals, health cards)
-3) Infrastructure (safe roads, drainage)
-4) Youth (skills training, startup support)
-Respond in Bangla, polite and concise (3-4 sentences). If user mentions a local problem, suggest tangible manifesto actions.`;
+    const systemPrompt = `You are an AI political assistant for a candidate running in Bangladesh in 2026. The manifesto focuses on:\n1) Education & Tech (smart classrooms, WiFi)\n2) Health (modern hospitals, health cards)\n3) Infrastructure (safe roads, drainage)\n4) Youth (skills training, startup support)\nRespond in Bangla, polite and concise (3-4 sentences). If user mentions a local problem, suggest tangible manifesto actions.`;
 
     let retries = 0;
     const maxRetries = 4;
@@ -194,7 +187,7 @@ Respond in Bangla, polite and concise (3-4 sentences). If user mentions a local 
     // If apiKey missing, short-circuit with sample response (useful for local dev)
     if (!apiKey) {
       setTimeout(() => {
-        setAiResponse("আপনার এলাকায় সমস্যার জন্য প্রাথমিক সমাধান: রাস্তাঘাট পুনরুদ্ধার, স্থানীয় স্বাস্থ্যকেন্দ্র সক্রিয় করা এবং তরুণদের প্রশিক্ষণের ব্যবস্থা করা হবে। এটি দীর্ঘমেয়াদে কর্মসংস্থান ও স্থানীয় উন্নয়ন বৃদ্ধিতে সাহায্য করবে。);
+        setAiResponse("আপনার এলাকায় সমস্যার জন্য প্রাথমিক সমাধান: রাস্তাঘাট পুনরুদ্ধার, স্থানীয় স্বাস্থ্যকেন্দ্র সক্রিয় করা এবং তরুণদের প্রশিক্ষণের ব্যবস্থা করা হবে। এটি দীর্ঘমেয়াদে কর্মসংস্থান ও স্থানীয় উন্নয়ন বৃদ্ধিতে সাহায্য করবে।");
         setAiLoading(false);
       }, 700);
       return;
@@ -329,7 +322,7 @@ Respond in Bangla, polite and concise (3-4 sentences). If user mentions a local 
                </div> 
             </div> 
 
-            <div className="mt-6 flex gap-3.justify-center"> 
+            <div className="mt-6 flex gap-3 justify-center"> 
               {['রাস্তাঘাট', 'বেকারত্ব', 'চিকিৎসা', 'ওয়াইফাই'].map((tag, i) => ( 
                 <button key={tag} onClick={() => { const q = `আমাদের এলাকায় ${tag} নিয়ে প্রার্থীর পরিকল্পনা কী?`; setUserQuery(q); askGemini(q); }} className="bg-white/90 text-green-900 px-3 py-2 rounded-full text-xs font-bold shadow-sm hover:scale-105 transition"> 
                   #{tag} 
@@ -367,7 +360,7 @@ Respond in Bangla, polite and concise (3-4 sentences). If user mentions a local 
                     aria-label="AI query" 
                     value={userQuery} 
                     onChange={(e) => setUserQuery(e.target.value)} 
-                    placeholder="যেমন: আমাদের এলাকায় রাস্তাঘাট খুব খারাপ..." 
+                    placeholder="যেনে: আমাদের এলাকায় রাস্তাঘাট খুব খারাপ..." 
                     className="w-full p-4 rounded-xl border focus:ring-2 focus:ring-green-700 outline-none" 
                   /> 
                   <button  
@@ -451,7 +444,7 @@ Respond in Bangla, polite and concise (3-4 sentences). If user mentions a local 
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {manifestoData.map((item, idx) => (
-              <div key={idx} className="group p-6 rounded-2xl border hover:border-green-800 transition-all hover:bg-green-50/50">
+              <div key={idx} className="group p-6 rounded-2xl border hover:border-ಗreen-800 transition-all hover:bg-green-50/50">
                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4" style={{ backgroundColor: colors.primary }}>
                   {item.icon}
                 </div>
@@ -594,7 +587,7 @@ Respond in Bangla, polite and concise (3-4 sentences). If user mentions a local 
         </div> 
       )} 
 
-      {/* FOOTER */} 
+      {/* FOOTER */}
       <footer className="py-12" style={{ backgroundColor: darkMode ? '#000' : '#000' }}> 
         <div className="container mx-auto px-6 text-center text-white"> 
           <div className="flex items-center gap-3 justify-center mb-6"> 
