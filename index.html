@@ -11,6 +11,46 @@
             darkMode: 'class',
         }
     </script>
+
+    <script>
+        // Detect touch device
+function isTouchDevice() {
+    return ('ontouchstart' in window) || 
+           (navigator.maxTouchPoints > 0) || 
+           (navigator.msMaxTouchPoints > 0);
+}
+
+// Mobile-specific optimizations
+function optimizeForMobile() {
+    if (!isTouchDevice()) return;
+    
+    const scrollContainer = document.getElementById('frames-scroll-container');
+    const frames = document.querySelectorAll('.frame-option');
+    
+    if (scrollContainer) {
+        // Increase touch area
+        scrollContainer.style.paddingTop = '10px';
+        scrollContainer.style.paddingBottom = '10px';
+        
+        // Better scrolling experience
+        scrollContainer.style.overscrollBehaviorX = 'contain';
+    }
+    
+    // Larger touch targets for frames
+    frames.forEach(frame => {
+        frame.style.minWidth = '85px';
+        frame.style.height = '85px';
+        frame.style.margin = '5px';
+    });
+}
+
+// Call this after DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    optimizeForMobile();
+    initFrameSelectorTouchScroll();
+});
+    </script>
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         /* ফন্টগুলো রেজিস্টার করা হচ্ছে */
@@ -760,6 +800,34 @@ nav button:not(#mobile-menu-btn):not(.frame-template-btn) {
         input[type="file"] {
             display: none;
         }
+
+        /* Alternative Simple Solution */
+#frames-scroll-container {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+#frames-scroll-container::-webkit-scrollbar {
+    display: none;
+}
+
+.frame-option {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    touch-action: pan-x;
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+    #frames-scroll-container {
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 20px; /* Extra space for iOS */
+    }
+}
     </style>
 <style>
 /* মোবাইল মেনু অ্যানিমেশন */
@@ -4952,14 +5020,64 @@ document.getElementById('video-modal').addEventListener('click', function(e) {
   <!-- Main Content -->
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div class="max-w-[575px] mx-auto">
-            <!-- Frame Selector - Fixed at Top -->
+<!-- Frame Selector - Fixed at Top -->
 <div class="rounded-2xl shadow-xl p-1 sm:p-6 mb-6 top-4 z-10 border border-gray-100">
     <h2 class="text-lg sm:text-xl font-light text-white mb-4">ফ্রেম নির্বাচন করুন</h2>
-    <div class="overflow-x-auto pb-2" style="scrollbar-width: thin;">
+    <div id="frames-scroll-container" class="overflow-x-auto pb-2 scrollbar-hide touch-auto" 
+         style="scrollbar-width: none; -ms-overflow-style: none; touch-action: pan-x;">
         <div class="flex gap-4" id="framesGrid" style="min-width: max-content;"></div>
     </div>
 </div>
 
+<style>
+    /* Frame Selector Scroll Fix */
+#frames-scroll-container {
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+#frames-scroll-container:active {
+    cursor: grabbing;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+}
+
+/* Frame option improvements for touch */
+.frame-option {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.frame-option:active {
+    transform: scale(0.95);
+}
+
+/* Mobile touch improvements */
+@media (max-width: 768px) {
+    #frames-scroll-container {
+        overscroll-behavior-x: contain;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 8px;
+    }
+    
+    .frame-option {
+        scroll-snap-align: start;
+        min-width: 80px;
+        height: 80px;
+    }
+}</style>
     
             <!-- Canvas Container -->
             <div class="rounded-2xl shadow-xl p-4 sm:p-6 border border-gray-100 mb-6">
@@ -5276,6 +5394,47 @@ document.getElementById('video-modal').addEventListener('click', function(e) {
                 }, 300);
             }
         }
+
+        // Add touch improvements after loading frames
+function addFrameTouchImprovements() {
+    const frames = document.querySelectorAll('.frame-option');
+    
+    frames.forEach(frame => {
+        // Remove default click delay on mobile
+        frame.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+        
+        // Add active state
+        frame.addEventListener('touchstart', () => {
+            frame.style.transform = 'scale(0.95)';
+        });
+        
+        frame.addEventListener('touchend', () => {
+            frame.style.transform = 'scale(1)';
+        });
+        
+        // Prevent context menu on long press
+        frame.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            return false;
+        });
+    });
+}
+
+// Update the loadFrames function to call this
+async function loadFrames() {
+    // ... existing frame loading code ...
+    
+    // After loading all frames
+    await Promise.all(framePromises);
+    
+    // Add touch improvements
+    addFrameTouchImprovements();
+    
+    // Initialize touch scroll
+    setTimeout(initFrameSelectorTouchScroll, 100);
+}
 
         function selectFrame(element, frameUrl) {
             document.querySelectorAll('.frame-option').forEach(el => el.classList.remove('selected'));
@@ -5851,6 +6010,121 @@ document.getElementById('video-modal').addEventListener('click', function(e) {
         }
 
         window.addEventListener('DOMContentLoaded', startApp);
+    
+        // Frame Selector Touch Scroll Functionality
+function initFrameSelectorTouchScroll() {
+    const scrollContainer = document.getElementById('frames-scroll-container');
+    if (!scrollContainer) return;
+
+    let isDragging = false;
+    let startX;
+    let scrollLeft;
+
+    // Mouse events for desktop
+    scrollContainer.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        scrollContainer.style.cursor = 'grabbing';
+        startX = e.pageX - scrollContainer.offsetLeft;
+        scrollLeft = scrollContainer.scrollLeft;
+    });
+
+    scrollContainer.addEventListener('mouseleave', () => {
+        isDragging = false;
+        scrollContainer.style.cursor = 'grab';
+    });
+
+    scrollContainer.addEventListener('mouseup', () => {
+        isDragging = false;
+        scrollContainer.style.cursor = 'grab';
+    });
+
+    scrollContainer.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.pageX - scrollContainer.offsetLeft;
+        const walk = (x - startX) * 2; // Scroll speed multiplier
+        scrollContainer.scrollLeft = scrollLeft - walk;
+    });
+
+    // Touch events for mobile
+    scrollContainer.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        startX = e.touches[0].pageX - scrollContainer.offsetLeft;
+        scrollLeft = scrollContainer.scrollLeft;
+    }, { passive: true });
+
+    scrollContainer.addEventListener('touchend', () => {
+        isDragging = false;
+    });
+
+    scrollContainer.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.touches[0].pageX - scrollContainer.offsetLeft;
+        const walk = (x - startX) * 2;
+        scrollContainer.scrollLeft = scrollLeft - walk;
+    }, { passive: false });
+
+    // Prevent vertical scroll on frame selector
+    scrollContainer.addEventListener('wheel', (e) => {
+        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+            // Horizontal scroll - allow
+            scrollContainer.scrollLeft += e.deltaX;
+        } else {
+            // Vertical scroll - prevent to avoid page scrolling
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    // Add momentum scrolling for mobile
+    let momentumId;
+    scrollContainer.addEventListener('touchstart', () => {
+        cancelAnimationFrame(momentumId);
+    });
+
+    scrollContainer.addEventListener('touchend', (e) => {
+        const touch = e.changedTouches[0];
+        const velocityX = touch.pageX - startX;
+        
+        // Add momentum
+        let momentum = velocityX * 0.8;
+        let decay = 0.9;
+        
+        function applyMomentum() {
+            if (Math.abs(momentum) > 0.5) {
+                scrollContainer.scrollLeft += momentum;
+                momentum *= decay;
+                momentumId = requestAnimationFrame(applyMomentum);
+            }
+        }
+        
+        applyMomentum();
+    });
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize frame selector touch scroll
+    initFrameSelectorTouchScroll();
+    
+    // Also initialize when frames are loaded (in case of async loading)
+    const observer = new MutationObserver(() => {
+        if (document.getElementById('framesGrid').children.length > 0) {
+            initFrameSelectorTouchScroll();
+            observer.disconnect();
+        }
+    });
+    
+    observer.observe(document.getElementById('framesGrid'), { childList: true });
+    
+    // Fallback: initialize after 2 seconds
+    setTimeout(initFrameSelectorTouchScroll, 2000);
+});
+
+// Add to window resize handler to reinitialize if needed
+window.addEventListener('resize', function() {
+    setTimeout(initFrameSelectorTouchScroll, 100);
+});
     </script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"0fcae263d6cc4af69b088db69c0d359c","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
         
